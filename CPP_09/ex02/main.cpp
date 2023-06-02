@@ -6,7 +6,7 @@
 /*   By: aguyon <aguyon@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/27 18:03:38 by aguyon            #+#    #+#             */
-/*   Updated: 2023/05/27 19:41:15 by aguyon           ###   ########.fr       */
+/*   Updated: 2023/05/31 13:23:26 by aguyon           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,13 +14,13 @@
 #include "utils.hpp"
 #include <vector>
 #include <list>
+#include <deque>
 #include <iostream>
 #include <cstdlib>
 #include <errno.h>
 #include <string.h>
 #include <functional>
-#include <sys/time.h>
-#include <iomanip>
+#include <ctime>
 
 unsigned long myStrtoul(const char *str)
 {
@@ -28,16 +28,21 @@ unsigned long myStrtoul(const char *str)
 
 	n = strtoul(str, NULL, 10);
 	if (!all_of(str, str + strlen(str), isdigit))
-		throw std::runtime_error("input is not an integer");
+		throw std::runtime_error(str + std::string(" is not a positive integer"));
 	if (errno == ERANGE)
-		throw std::runtime_error("input is out of range");
+		throw std::overflow_error(str + std::string(" is out of range"));
 	return (n);
+}
+
+void printExecutionTime(const clock_t& start, const clock_t& end, unsigned int nb_elem, const std::string& container_name)
+{
+	std::cout << "Time to process a range of " << nb_elem << " elemtents with std::" << container_name << " : ";
+	std::cout << std::fixed << (end - start) / (double)CLOCKS_PER_SEC << " sec" << std::endl;
 }
 
 int main(int argc, char *argv[])
 {
 	clock_t start, end;
-	double time_taken;
 
 	std::vector<unsigned long> vec(argc - 1);
 	try
@@ -50,26 +55,34 @@ int main(int argc, char *argv[])
 		return (1);
 	}
 	std::list<unsigned long> lst(vec.begin(), vec.end());
+	std::deque<unsigned long> deq(vec.begin(), vec.end());
 
+	//Vector sort
+	std::cout << "Before:   ";
+	std::copy(vec.begin(), vec.end(), std::ostream_iterator<unsigned long>(std::cout, " ")), std::cout << std::endl;
 	start = clock();
 	mergeInsertSort(vec.begin(), vec.end());
 	end = clock();
+	std::cout << "After:   ";
+	std::copy(vec.begin(), vec.end(), std::ostream_iterator<unsigned long>(std::cout, " ")), std::cout << std::endl;
+	printExecutionTime(start, end, vec.size(), "vector");
 
-	time_taken = double(end - start) / double(CLOCKS_PER_SEC) * 1000000.0;
-    std::cout << "Time taken by program is : " << std::fixed
-         << time_taken << std::setprecision(5);
-    std::cout << " us " << std::endl;
-
+	//List sort
 	start = clock();
 	mergeInsertSort(lst.begin(), lst.end());
 	end = clock();
+	printExecutionTime(start, end, lst.size(), "list");
 
-	time_taken = static_cast<double>(end - start) / static_cast<double>(CLOCKS_PER_SEC) * 1000000.0;
-    std::cout << "Time taken by program is : " << std::fixed
-         << time_taken << std::setprecision(5);
-    std::cout << " us " << std::endl;
+	//Dequeue sort
+	start = clock();
+	mergeInsertSort(deq.begin(), deq.end());
+	end = clock();
+	printExecutionTime(start, end, deq.size(), "deque");
 
-	std::cout << std::boolalpha << is_sorted(vec.begin(), vec.end(), std::less<unsigned long>());
+	std::cout << std::boolalpha;
+	std::cout << "std::vector is sorted : " << is_sorted(vec.begin(), vec.end(), std::less<unsigned long>()) << std::endl;
+	std::cout << "std::list is sorted : " << is_sorted(lst.begin(), lst.end(), std::less<unsigned long>()) << std::endl;
+	std::cout << "std::deque is sorted : " << is_sorted(deq.begin(), deq.end(), std::less<unsigned long>()) << std::endl;
 
 	return (0);
 }

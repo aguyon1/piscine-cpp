@@ -6,7 +6,7 @@
 /*   By: aguyon <aguyon@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/27 18:09:19 by aguyon            #+#    #+#             */
-/*   Updated: 2023/05/27 19:21:50 by aguyon           ###   ########.fr       */
+/*   Updated: 2023/05/31 13:33:58 by aguyon           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,9 @@
 #include <algorithm>
 #include <iterator>
 
-#define K 5
+#ifndef K
+	#define K 100
+#endif
 
 template<typename InputIt>
 InputIt next(InputIt it, typename std::iterator_traits<InputIt>::difference_type n = 1)
@@ -35,7 +37,7 @@ void insertionSort(InputIt first, InputIt last)
 template <typename InputIt>
 void mergeInsertSort(InputIt first, InputIt last)
 {
-	typename std::iterator_traits<InputIt>::difference_type size = std::distance(first, last);
+	typename std::iterator_traits<InputIt>::difference_type const size = std::distance(first, last);
 	if (size > K)
 	{
 		InputIt middleIt = next(first, size / 2);
